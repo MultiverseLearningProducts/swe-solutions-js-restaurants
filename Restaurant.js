@@ -3,23 +3,23 @@ const Menu = require('./Menu')
 const db = require('better-sqlite3')('./db.sqlite')
 
 class Restaurant {
-    static all = []
-    static init = function () {
-        db.prepare('CREATE TABLE IF NOT EXISTS restaurants (id INTEGER PRIMARY KEY, name TEXT);').run()
-        const restaurants = db.prepare('SELECT * FROM restaurants;').all()
-        restaurants.forEach(restaurant => {
-            const { id, name, imageURL} = restaurant
-            const restaurantInstance = new Restaurant(name, imageURL, id)
-            const menusRows = db.prepare('SELECT * FROM menus WHERE restaurant_id = ?;').all(restaurantInstance.id)
-            
-            menusRows.forEach(menuRow => {
-                const { id, title, restaurant_id } = menuRow
-                const menuInstance = new Menu(restaurant_id, title, id)
-                restaurantInstance.menus.push(menuInstance)
-            })
-        })
+    static init = () => {
+        db.prepare('CREATE TABLE IF NOT EXISTS restaurants (id INTEGER PRIMARY KEY, name TEXT, imageURL Text);').run()
+        
+        const restaurants_rows = db.prepare('SELECT * FROM restaurants;').all()
+        
+        for(let restaurant_row of restaurants_rows) {
+            const restaurant = new Restaurant(restaurant_row.name, restaurant_row.imageURL, restaurant_row.id)
+            const menus_rows = db.prepare('SELECT * FROM menus WHERE restaurant_id = ?;').all(restaurant.id)
+            for(const menu_row of menus_rows) {
+                const menu = new Menu(menu_row.restaurant_id, menu_row.title, menu_row.id)
+                restaurant.addMenu(menu)
+            }
+        }
     }
     
+    static all = []
+
     constructor(name, imageURL, id) {
         this.name = name
         this.imageURL = imageURL
@@ -27,16 +27,20 @@ class Restaurant {
         if (id) {
             this.id = id
         } else {
-            const insert = db.prepare('INSERT INTO restaurants (name) VALUES (?);')
-            const info = insert.run(this.name)
-            this.id = info.lastInsertRowid
+            const insert = db.prepare('INSERT INTO restaurants (name, imageURL) VALUES (?,?);')
+            const row = insert.run(this.name, this.imageURL)
+            this.id = row.lastInsertRowid
         }
+        
         Restaurant.all.push(this)
     }
 
-    addMenu(menuTitle) {
-        const menu = new Menu(this.id, menuTitle)
-        this.menus.push(menu)
+    addMenu(menu) {
+        if (!menu.id) {
+            // add to database
+        } else {
+            this.menus.push(menu)
+        }
     }
 }
 
