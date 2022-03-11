@@ -1,7 +1,5 @@
-const Restaurant = require('./Restaurant')
 const Menu = require('./Menu')
+const Restaurant = require('./Restaurant')
+const Item = require('./Item')
 
-Restaurant.init()
-Menu.init()
-
-console.log(Restaurant.all)
+module.exports = { Menu, Restaurant, Item }
