@@ -36,9 +36,9 @@ class Restaurant {
     }
 
     update(updates) {
-        this.name = updates.name || this.name
+        this.name     = updates.name     || this.name
         this.imageURL = updates.imageURL || this.imageURL
-        this.menus = updates.menus || this.menus
+        this.menus    = updates.menus    || this.menus
         const update = db.prepare('UPDATE restaurants SET name=?, imageURL=? WHERE id=?;')
         update.run(this.name, this.imageURL, this.id)
     }
