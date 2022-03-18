@@ -1,4 +1,3 @@
-const db = require("better-sqlite3")("./db.sqlite");
 const db = require("./db");
 
 class Item {
